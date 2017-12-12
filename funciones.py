@@ -13,9 +13,13 @@ def aprueba_becario(nombre_completo):
     return True
 
 def matar_becario(borrar):
+    matar = borrar.split()
+    for n in borrar:
+        if n in becarios:
+            return True
+        aprobados.remove(borrar)
+        return True
     
-
-
 
 becarios = ['Becerra Alvarado Hugo Alonso',
             'Cabrera Balderas Carlos Eduardo',
