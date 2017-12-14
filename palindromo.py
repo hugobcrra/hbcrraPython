@@ -1,3 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#Hgo Becerra
+#UNAM-CERT
+
 n = 'anitalavalatina'
 
 def palindromo(n):
