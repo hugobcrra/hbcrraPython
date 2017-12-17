@@ -1,0 +1,130 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#UNAM-CERT
+#Becerra Alvarado Hugo Alonso
+#Cabrera Balderas Carlos Eduardo
+
+import sys
+import optparse
+from requests import get 
+from requests import options
+import requests
+from requests.exceptions import ConnectionError
+import socks
+import socket
+import re 
+from re import search
+import httplib                            
+import urllib2
+
+f1=open("reporte.txt",'w')
+
+def printError(msg, exit = False):
+	sys.stderr.write ('Error:\t%s\n' % msg)
+	if exit:
+		sys.exit(1)
+def addOptions():
+	parser = optparse.OptionParser()
+	parser.add_option('-v','--verbose', dest='verbose', default=None, action= 'store_true', help='Detalles.') 
+	parser.add_option('-c', '--correo', dest='correo', default=None, help='Obtenemos el correo.')
+	parser.add_option('-s', '--server', dest='server', default=None, help='Nos da la version del servidor') #ya
+	parser.add_option('-p', '--php', dest='php', action='store_true', default=None, help="Nos da la version de PHP.")#ya
+	parser.add_option('-m', '--http', dest= 'http', default=None, action='store_true', help="Nos da los metodos http usados.")
+	parser.add_option('-C', '--cms', dest='cms', default=None, action='store_true', help="Nos da los cms.") #ya
+	parser.add_option('-r', '--reporte', dest='reporte', default=None, action="store_true", help="Nos genera un reporte.")
+	parser.add_option('-t', '--tor', dest='tor', default=None, action="store_true", help="Se usara tor.")
+	parser.add_option('-b', '--busqueda', dest='busqueda', default=None, action="store_true", help="Se hara la busqueda.")
+	parser.add_option('-a', '--archivo', dest='archivo', default=None, help="Archivo de configuracion.")
+	opts,args = parser.parse_args()
+	return opts
+
+def checkOption(option):
+	if option.server is None:
+		printError('Especifica un servidor.', True)
+
+def busqueda(opts):
+	try:
+		with open(bfiles, 'r') as lst:
+			listaB = lst.readline()
+			#print lst
+			for l in listaB:
+				url_files = opts.server + "/" + l
+				nope = 0 
+				if url_files.status_code == 200:
+					for mala in url_files.history == 302:
+						nope = 1
+						if nope == 0: 
+							f1.write("\nArchivo(s) encontrado(s): \n" + url_files)
+			lst.close()
+	except Exception as e:
+		printError("No hay archivos")
+
+if __name__ == '__main__':
+	try:
+		opts = addOptions()
+		checkOption(opts)
+
+		if opts.verbose == True:
+			print "Ingresaste verbose"
+		if opts.correo == True:
+			try:
+				pet = urllib2.Request(opts.server)
+				html1 = urllib2.urlopen(pet).read()
+				co = re.findall("[a-z]+\.*[a-z]*@.*\..*", html1)
+				f1.write("\nLos correos son: %s\n" % co) 
+				print 'Los correos son: %s' % co
+			except:
+				print 'No encontré correos :/'
+		if opts.server != False:
+			try:
+				re_server = get(opts.server).headers['server']
+				f1.write("\nEl servidor que usa es: %s\n" % re_server)
+				print "La version del servidor es %s" % re_server
+			except:
+				print 'No se puedo obtener la versión del servidor uwu'
+
+		if opts.php == True:
+			try:
+
+				re_php = options(opts.server).headers['X-Powered-By']
+				f1.write("\nLa version de PHP que usa es: %s\n" % re_php)
+				print "La version del servidor es %s" % re_php
+			except:
+				print 'No se pudo obtener la versión de php'
+
+		if opts.http == True:
+			try:
+				re_http = requests.options(opts.server).headers['allow']
+				f1.write("\nLos metodos http que usa son: %s\n" % re_http)
+				print "Los metodos http que usa son: %s " % re_http
+			except:
+				print 'No se encontró los métodos :O'
+
+		if opts.cms == True:
+			try:
+				req = urllib2.Request(opts.server)
+				html = urllib2.urlopen(req).read()
+				patron = re.findall('<meta name=\"Generator\" content=\".*\"', html)
+				print "El cms es " + patron[0].split("\"")[3] + "\n"
+			except:
+				print 'No se pudo obtener el cms xS'
+
+		if opts.reporte == True:
+			print "Ingresaste reporte."
+		if opts.tor == True:
+			print "Ingresaste tor."
+		if opts.busqueda == True:
+			try:
+				busqueda(opts)
+			except:
+				print 'No hay busqueda xS'
+		if opts.archivo == True:
+			arch = open(opts.archivo, 'r')
+			for n in arch.readlines():
+				print n
+			arch.close()
+	except Exception as e:
+		printError('Ocurrio un error inesperado')
+		printError(e, True)
+
+f1.close()
