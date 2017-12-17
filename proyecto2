@@ -11,9 +11,11 @@ from requests import options
 import requests
 from requests.exceptions import ConnectionError
 import socks
+from datetime import datetime
 import socket
 import re 
 from re import search
+from re import findall
 import httplib                            
 import urllib2
 
@@ -34,7 +36,6 @@ def addOptions():
 	parser.add_option('-r', '--reporte', dest='reporte', default=None, action="store_true", help="Nos genera un reporte.")
 	parser.add_option('-t', '--tor', dest='tor', default=None, action="store_true", help="Se usara tor.")
 	parser.add_option('-b', '--busqueda', dest='busqueda', default=None, action="store_true", help="Se hara la busqueda.")
-	parser.add_option('-a', '--archivo', dest='archivo', default=None, help="Archivo de configuracion.")
 	opts,args = parser.parse_args()
 	return opts
 
@@ -44,17 +45,25 @@ def checkOption(option):
 
 def busqueda(opts):
 	try:
-		with open(bfiles, 'r') as lst:
+		arch=open('archivos.txt','w') #Para guardar el contenido encontredo en el servidor
+		with open('bfiles.txt', 'r') as lst: #archivo que muestra el nombre de los posibles archivos que se pueden encontrar en el servidor
 			listaB = lst.readline()
 			#print lst
 			for l in listaB:
 				url_files = opts.server + "/" + l
 				nope = 0 
-				if url_files.status_code == 200:
-					for mala in url_files.history == 302:
-						nope = 1
-						if nope == 0: 
-							f1.write("\nArchivo(s) encontrado(s): \n" + url_files)
+				rqst=requests.get(url_files[:-1:])
+
+				if rqst.status_code == 200:
+
+					for mala in rqst.history:
+						if mala.status_code==302:
+							nope = 1
+					if nope == 0: 
+						print 'Abra el archivo "archivos.txt" para ver los archivos almacenados'
+						f1.write(l)
+						arch.write(l)
+
 			lst.close()
 	except Exception as e:
 		printError("No hay archivos")
@@ -67,6 +76,10 @@ if __name__ == '__main__':
 		if opts.verbose == True:
 			print "Ingresaste verbose"
 		if opts.correo == True:
+			"""
+			Busca dentro del código html los correos que se encuentren en este, usando findall y 
+			expresiones regulares
+			"""
 			try:
 				pet = urllib2.Request(opts.server)
 				html1 = urllib2.urlopen(pet).read()
@@ -110,7 +123,7 @@ if __name__ == '__main__':
 				print 'No se pudo obtener el cms xS'
 
 		if opts.reporte == True:
-			print "Ingresaste reporte."
+			f1.write("\nFecha: " + str(datetime.now()) + "\nURL: " + opts.server)
 		if opts.tor == True:
 			print "Ingresaste tor."
 		if opts.busqueda == True:
@@ -118,13 +131,9 @@ if __name__ == '__main__':
 				busqueda(opts)
 			except:
 				print 'No hay busqueda xS'
-		if opts.archivo == True:
-			arch = open(opts.archivo, 'r')
-			for n in arch.readlines():
-				print n
-			arch.close()
 	except Exception as e:
 		printError('Ocurrio un error inesperado')
 		printError(e, True)
 
 f1.close()
+
