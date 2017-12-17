@@ -4,6 +4,7 @@
 #Becerra Alvarado Hugo Alonso
 #Cabrera Balderas Carlos Eduardo
 
+
 import sys
 import optparse
 from requests import get 
@@ -78,10 +79,10 @@ if __name__ == '__main__':
 		if opts.correo == True:
 			"""
 			Busca dentro del código html los correos que se encuentren en este, usando findall y 
-			expresiones regulares
+			expresiones regulares, mostrando los posibles correos encontrados.
 			"""
 			try:
-				pet = urllib2.Request(opts.server)
+				pet = urllib2.Request(opts.server) 
 				html1 = urllib2.urlopen(pet).read()
 				co = re.findall("[a-z]+\.*[a-z]*@.*\..*", html1)
 				f1.write("\nLos correos son: %s\n" % co) 
@@ -89,23 +90,32 @@ if __name__ == '__main__':
 			except:
 				print 'No encontré correos :/'
 		if opts.server != False:
+			"""
+			Busca en las cabeceras http el servidor y muestra el nombre de este.
+			"""
 			try:
-				re_server = get(opts.server).headers['server']
-				f1.write("\nEl servidor que usa es: %s\n" % re_server)
+				re_server = get(opts.server).headers['server'] #Trae la cabecera headers, y mestra el nombre
+				f1.write("\nEl servidor que usa es: %s\n" % re_server)#guarda el resultado en el reporte.txt
 				print "La version del servidor es %s" % re_server
 			except:
-				print 'No se puedo obtener la versión del servidor uwu'
+				print 'No se puedo obtener la versión del servidor uwu' #Si no encuentra la cabecera, manda este error.
 
 		if opts.php == True:
+			"""
+			Muestra la versión de PHP que maneja el servidor, obteniendo el nombre de la cabecera X-Powered-By
+			y guardando el resultado en el reporte.txt
+			"""
 			try:
-
 				re_php = options(opts.server).headers['X-Powered-By']
 				f1.write("\nLa version de PHP que usa es: %s\n" % re_php)
 				print "La version del servidor es %s" % re_php
 			except:
-				print 'No se pudo obtener la versión de php'
+				print 'No se pudo obtener la versión de php uwu'
 
 		if opts.http == True:
+			"""
+			Obtiene los métdos https, a trevés de la cabecera Allow, esta nos muestra los métodos que permite y maneja el sitio web
+			"""
 			try:
 				re_http = requests.options(opts.server).headers['allow']
 				f1.write("\nLos metodos http que usa son: %s\n" % re_http)
@@ -114,6 +124,10 @@ if __name__ == '__main__':
 				print 'No se encontró los métodos :O'
 
 		if opts.cms == True:
+			"""
+			Obtiene el CMS (content management system), buscando en el código HTML, su <meta name='Generator' content=*>
+			después, sólo queremos lo que hay en content así que hacemos un split para obtener solo el content
+			"""
 			try:
 				req = urllib2.Request(opts.server)
 				html = urllib2.urlopen(req).read()
@@ -123,6 +137,9 @@ if __name__ == '__main__':
 				print 'No se pudo obtener el cms xS'
 
 		if opts.reporte == True:
+			"""
+			Muestra el servidor y la fecha en la cual se realizó el escaneo.
+			"""
 			f1.write("\nFecha: " + str(datetime.now()) + "\nURL: " + opts.server)
 		if opts.tor == True:
 			print "Ingresaste tor."
@@ -136,4 +153,5 @@ if __name__ == '__main__':
 		printError(e, True)
 
 f1.close()
+#Feliz Navidad :D y prospero año nuevo
 
